@@ -30,3 +30,87 @@ sudo systemctl enable docker.service
 sudo systemctl enable containerd.service
 ```
 
+## Install Docker-compose
+1. Follow the instructions in this link: [https://docs.docker.com/compose/install/]
+
+See if it is correctly installed
+```sh
+docker-compose --version
+```
+
+## Create docker-compose file for jupyter-lab
+change out mimslade to your user.
+First path in volumes is the path on your host computer you want to stor notebooks.
+second path in volumes is the path on the docker container.
+1. Create file named: docker-compose.yml
+```yml
+version: "3"
+services:
+    datascience-notebook:
+        image: 'jupyter/datascience-notebook'
+        volumes:
+            - '/home/mimslade/dev/notebook:/home/mimslade/work'
+        ports:
+            - '8888:8888'
+        command: "start-notebook.sh"
+        container_name: 'dnc'
+        user: 'root'
+        environment:
+            NB_USER: 'mimslade'
+            NB_UID: 1000
+            NB_GID: 1000
+            CHOWN_HOME: 'yes'
+            CHOWN_HOME_OPTS: '-R'
+            GRANT_SUDO: 'yes'
+            JUPYTER_ENABLE_LAB: 'yes'
+
+
+```
+
+2. suggested path to store yml file
+```sh
+/home/mimslade/dev/docker/docker-compose/jupyter-lab/docker-compose.yml
+```
+
+3. Try out if the docker-compose file is working
+```sh
+cd /home/mimslade/dev/docker/docker-compose/jupyter-lab
+```
+```sh
+docker-compose up
+```
+
+4. Add so that jupyter-lab is started on startup.
+```sh
+cd /etc/systemd/system
+```
+```sh
+vim docker-compose-app.service
+```
+docker-compose-app.service
+```
+# /etc/systemd/system/docker-compose-app.service
+
+[Unit]
+Description=Docker Compose Application Service
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/home/mimslade/dev/docker/docker-compose/jupyterlab
+ExecStart=/usr/local/bin/docker-compose up -d
+ExecStop=/usr/local/bin/docker-compose down
+TimeoutStartSec=0
+
+[Install]
+WantedBy=multi-user.target
+```
+
+enable the service
+```sh
+systemctl enable docker-compoes-app
+```
+
+DONE
