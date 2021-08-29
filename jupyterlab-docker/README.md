@@ -47,9 +47,10 @@ second path in volumes is the path on the docker container.
 version: "3"
 services:
     datascience-notebook:
+        restart: 'always'
         image: 'jupyter/datascience-notebook'
         volumes:
-            - '/home/mimslade/dev/notebook:/home/mimslade/work'
+            - '/home/mimslade/dev:/home/mimslade/dev'
         ports:
             - '8888:8888'
         command: "start-notebook.sh"
@@ -80,37 +81,8 @@ cd /home/mimslade/dev/docker/docker-compose/jupyter-lab
 docker-compose up
 ```
 
-4. Add so that jupyter-lab is started on startup.
+4. run it in detached mode
 ```sh
-cd /etc/systemd/system
-```
-```sh
-vim docker-compose-app.service
-```
-docker-compose-app.service
-```
-# /etc/systemd/system/docker-compose-app.service
-
-[Unit]
-Description=Docker Compose Application Service
-Requires=docker.service
-After=docker.service
-
-[Service]
-Type=oneshot
-RemainAfterExit=yes
-WorkingDirectory=/home/mimslade/dev/docker/docker-compose/jupyterlab
-ExecStart=/usr/local/bin/docker-compose up -d
-ExecStop=/usr/local/bin/docker-compose down
-TimeoutStartSec=0
-
-[Install]
-WantedBy=multi-user.target
+docker-compose up -d
 ```
 
-enable the service
-```sh
-systemctl enable docker-compoes-app
-```
-
-DONE
